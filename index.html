@@ -11,33 +11,52 @@
 <body>
 
     <div id="scene-menu" class="scene">
-        <div id="btn-lang" class="btn-icon menu-lang-btn">🌐 中/En</div>
+        
+        <div class="menu-layout">
+            <div class="menu-header">
+                <h1 class="game-title">PROJECT<br>YATYZBANK</h1>
+                <div class="difficulty-header">SELECT BOSS TARGET</div>
+            </div>
 
-        <div class="menu-container">
-            <h1 class="game-title">Project<br>YatyzBank</h1>
-            <div class="difficulty-header">SELECT BOSS TARGET</div>
             <div class="poster-container">
-                <div class="bounty-poster easy" onclick="selectDifficulty('easy')">
-                    <div class="poster-pin">📍</div>
-                    <div class="wanted-title">BOSS</div>
-                    <div class="boss-icon">👺</div>
-                    <div class="boss-name" data-key="boss_easy">Goblin Rogue</div>
-                    <div class="boss-stats">HP: 1500</div>
+                
+                <div class="boss-card easy" onclick="selectDifficulty('easy')">
+                    <div class="card-info">
+                        <div class="boss-name-menu" data-key="boss_easy">GOBLIN ROGUE</div>
+                        <div class="boss-hp-menu">HP: 1500</div>
+                        <div class="difficulty-label">EASY</div>
+                    </div>
+                    <div class="card-img-container">
+                        <img src="assets/boss_goblin.png" class="boss-banner-img" alt="Goblin">
+                    </div>
                 </div>
-                <div class="bounty-poster normal" onclick="selectDifficulty('normal')">
-                    <div class="poster-pin">📍</div>
-                    <div class="wanted-title">BOSS</div>
-                    <div class="boss-icon">👹</div>
-                    <div class="boss-name" data-key="boss_normal">Orc Warrior</div>
-                    <div class="boss-stats">HP: 2000</div>
+
+                <div class="boss-card normal" onclick="selectDifficulty('normal')">
+                    <div class="card-info">
+                        <div class="boss-name-menu" data-key="boss_normal">ORC WARRIOR</div>
+                        <div class="boss-hp-menu">HP: 2000</div>
+                        <div class="difficulty-label">MEDIUM</div>
+                    </div>
+                    <div class="card-img-container">
+                        <img src="assets/boss_orc.png" class="boss-banner-img" alt="Orc">
+                    </div>
                 </div>
-                <div class="bounty-poster hard" onclick="selectDifficulty('hard')">
-                    <div class="poster-pin">📍</div>
-                    <div class="wanted-title">BOSS</div>
-                    <div class="boss-icon">🐉</div>
-                    <div class="boss-name" data-key="boss_hard">Red Dragon</div>
-                    <div class="boss-stats">HP: 3000</div>
+
+                <div class="boss-card hard" onclick="selectDifficulty('hard')">
+                    <div class="card-info">
+                        <div class="boss-name-menu" data-key="boss_hard">RED DRAGON</div>
+                        <div class="boss-hp-menu">HP: 3000</div>
+                        <div class="difficulty-label">HARD</div>
+                    </div>
+                    <div class="card-img-container">
+                        <img src="assets/boss_dragon.png" class="boss-banner-img" alt="Dragon">
+                    </div>
                 </div>
+
+            </div>
+
+            <div class="menu-footer">
+                <div id="btn-lang" class="lang-toggle-btn">中 / ENG</div>
             </div>
         </div>
     </div>
@@ -109,7 +128,6 @@
             <div class="player-area">
                 <div class="player-avatar">
                     <div id="p-init-label" class="initiative-label">FIRST HAND</div>
-                    👤
                 </div>
                 <div class="player-stats-col">
                     <div class="player-name-row"></div>

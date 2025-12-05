@@ -1,6 +1,6 @@
 :root {
     /* --- COLORS --- */
-    --bg-matte: #0a0a0a;
+    --bg-matte: #2c2c2c; /* Wireframe background is dark grey */
     --bg-game: #222;
     
     --primary: #f1c40f; 
@@ -40,7 +40,7 @@
 
 body {
     margin: 0; padding: 0;
-    background-color: var(--bg-matte);
+    background-color: #0a0a0a; /* Outer matte */
     color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     /* FIX: Force no scrollbars */
@@ -56,66 +56,186 @@ body {
 /* ==========================================================================
    SCENE MANAGEMENT
    ========================================================================== */
-.scene { width: 100%; height: 100%; position: relative; }
-.scene.hidden { display: none !important; }
-
-#scene-game {
+.scene { 
     width: auto;
     height: 100%;
     aspect-ratio: 390 / 844;
     max-width: 100%;
     max-height: 100dvh;
-    background: var(--bg-game);
+    background: var(--bg-matte);
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
     position: relative;
     overflow: hidden;
 }
+.scene.hidden { display: none !important; }
 
 /* ==========================================================================
-   SCENE 1: MAIN MENU
+   SCENE 1: MAIN MENU (Mobile Wireframe Style)
    ========================================================================== */
 #scene-menu {
-    max-width: 1000px; 
-    margin: 0 auto;
-    display: flex; flex-direction: column; align-items: center;
-    overflow-y: auto;
+    background-color: #333; /* Dark Grey Background from Wireframe */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Language Button on Menu */
-.menu-lang-btn {
+.menu-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Header top, Cards center, Lang bottom */
+    align-items: center;
+    padding: 60px 20px 40px 20px;
+}
+
+.menu-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-title { 
+    font-family: 'Times New Roman', serif; /* Serif font per wireframe */
+    font-size: 2.8rem; 
+    color: var(--primary); 
+    line-height: 1.1;
+    margin: 0 0 20px 0;
+    font-weight: normal;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.difficulty-header { 
+    font-family: 'Times New Roman', serif;
+    color: #fff; 
+    font-size: 1rem; 
+    letter-spacing: 1px; 
+    text-transform: uppercase; 
+}
+
+.poster-container { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 20px; 
+    width: 100%;
+    align-items: center;
+}
+
+/* --- NEW CARD STYLE (Layered for Full Image) --- */
+.boss-card {
+    width: 90%; /* Relative width */
+    height: auto; 
+    aspect-ratio: 260 / 100; /* Lock aspect ratio (2.6 : 1) */
+    
+    background-color: #666; /* Fallback color */
+    
+    /* [FIX] Reset padding and border to ensure image fills edge-to-edge */
+    padding: 0;
+    border: none;
+    border-radius: 0; 
+    
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    
+    position: relative; /* Context for absolute children */
+    cursor: pointer;
+    overflow: hidden; 
+    transition: transform 0.2s;
+}
+.boss-card:active { transform: scale(0.98); }
+
+/* Image fills the entire card background */
+.card-img-container {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 0.9rem;
-    z-index: 100;
-    border-color: #666;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    z-index: 0; /* Behind text */
+    margin: 0; /* Ensure no margin */
+    padding: 0; /* Ensure no padding */
 }
 
-.menu-container { text-align: center; margin-top: 5vh; width: 100%; }
-.game-title { font-size: 3.5rem; color: var(--primary); text-shadow: 0 0 15px rgba(241, 196, 15, 0.5); margin-bottom: 20px; font-style: italic; }
-.difficulty-header { color: #bdc3c7; margin-bottom: 30px; font-size: 1.2rem; letter-spacing: 2px; text-transform: uppercase; }
-.poster-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; padding-bottom: 50px; }
-.bounty-poster {
-    background: #f4e4bc; color: #4a3b2a;
-    width: 220px; padding: 20px; border-radius: 4px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    text-align: center; cursor: pointer;
-    transition: all 0.3s; position: relative; border: 1px solid #d4c49c;
-    min-height: 260px; display: flex; flex-direction: column; align-items: center;
+.boss-banner-img {
+    display: block; /* [FIX] Removes bottom space caused by inline nature */
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Fill the area completely */
+    object-position: center;
+    border: none;
 }
-.bounty-poster:hover { transform: translateY(-10px) scale(1.05); z-index: 10; }
-.poster-pin { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 28px; }
-.wanted-title { font-family: 'Courier New', monospace; font-weight: 900; font-size: 2rem; margin-bottom: 15px; border-bottom: 3px solid #4a3b2a; }
-.boss-icon { font-size: 4.5rem; margin: 15px 0; }
-.boss-name { font-weight: bold; font-size: 1.2rem; text-transform: uppercase; margin-bottom: 5px; }
-.boss-stats { font-family: monospace; font-size: 1.1rem; color: #666; }
-.bounty-poster.easy { border-bottom: 6px solid #27ae60; }
-.bounty-poster.normal { border-bottom: 6px solid #e67e22; }
-.bounty-poster.hard { border-bottom: 6px solid #c0392b; }
+
+/* Text floats on top, restricted to left side */
+.card-info {
+    position: relative;
+    z-index: 1; /* On top of image */
+    width: 65%; /* Only take up left 65% space */
+    height: 100%;
+    padding: 3% 0 3% 5%;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    
+    /* Optional: Slight gradient to make text readable over any image */
+    background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+}
+
+.boss-name-menu {
+    font-family: 'Times New Roman', serif;
+    font-size: 1.4rem;
+    color: #fff; 
+    text-transform: uppercase;
+    font-weight: bold;
+    line-height: 1.1;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8); 
+}
+
+.boss-hp-menu {
+    font-family: 'Times New Roman', serif;
+    font-size: 1rem; 
+    color: #ddd; /* Light grey */
+    margin-top: 2%;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.difficulty-label {
+    font-family: sans-serif;
+    font-size: 0.85rem;
+    color: #f1c40f; /* Yellow for visibility */
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-top: 4%;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Footer Language Button */
+.menu-footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.lang-toggle-btn {
+    background: #888;
+    color: #fff;
+    padding: 6px 16px;
+    border: 1px solid #aaa;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: sans-serif;
+}
 
 /* ==========================================================================
    SCENE 2: GAME LAYOUT
    ========================================================================== */
+#scene-game {
+    background: var(--bg-game);
+}
+
 .game-layout {
     display: grid;
     width: 100%; height: 100%;
@@ -139,13 +259,8 @@ body {
 .boss-area { grid-area: boss; position: relative; display: flex; flex-direction: column; padding: 10px; }
 .boss-area::before {
     content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 110%;
-    
-    /* [MODIFIED] Use CSS variable for boss image with placeholder fallback */
     background: var(--boss-img, url('https://placehold.co/390x300/111/444?text=BOSS')) no-repeat center top;
-    
-    background-size: cover; 
-    opacity: 0.4; 
-    z-index: var(--z-boss-img);
+    background-size: cover; opacity: 0.4; z-index: var(--z-boss-img);
     mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
     transition: background-image 0.5s ease;
@@ -155,7 +270,7 @@ body {
 .boss-name-container { 
     font-weight: 900; font-size: 1.2rem; color: #fff; 
     text-shadow: 2px 2px 0 #000; letter-spacing: 1px; 
-    position: relative; /* Needed for absolute positioning of the label */
+    position: relative; 
 }
 
 /* Boss Status Label */
@@ -169,18 +284,18 @@ body {
     pointer-events: none;
 }
 
-/* Initiative Label Style - [MODIFIED] Reduced Size */
+/* Initiative Label Style - Small */
 .initiative-label {
     position: absolute;
-    bottom: 115%; /* Position above the parent */
+    bottom: 115%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #f1c40f; /* Yellow */
+    background-color: #f1c40f; 
     color: #000;
     font-weight: bold;
-    padding: 2px 5px; /* [MODIFIED] Smaller padding */
+    padding: 2px 5px; 
     border-radius: 4px;
-    font-size: 0.6rem; /* [MODIFIED] Smaller font */
+    font-size: 0.6rem; 
     z-index: 150;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     text-shadow: none; 
@@ -189,14 +304,13 @@ body {
     white-space: nowrap;
     pointer-events: none;
 }
-/* The arrow pointing down */
 .initiative-label::after {
     content: '';
     position: absolute;
-    bottom: -4px; /* [MODIFIED] Adjusted for smaller arrow */
+    bottom: -4px; 
     left: 50%;
     transform: translateX(-50%);
-    border-width: 4px 4px 0; /* [MODIFIED] Smaller arrow */
+    border-width: 4px 4px 0; 
     border-style: solid;
     border-color: #f1c40f transparent transparent transparent;
 }
@@ -204,21 +318,21 @@ body {
 /* --- BOSS Initiative Label Override --- */
 .boss-name-container .initiative-label {
     left: 0;
-    transform: none; /* Align left for text */
+    transform: none; 
 }
 .boss-name-container .initiative-label::after {
-    left: 20px; /* Adjust arrow to align with start of name */
+    left: 20px; 
     transform: none;
 }
 
 /* --- PLAYER Initiative Label Override --- */
 .player-avatar .initiative-label {
-    left: 0; /* Align with left edge of avatar to prevent cut-off */
-    transform: none; /* Disable centering */
+    left: 0; 
+    transform: none; 
 }
 .player-avatar .initiative-label::after {
-    left: 35px; /* Center of 70px avatar */
-    transform: translateX(-50%); /* Center arrow on that point */
+    left: 35px; 
+    transform: translateX(-50%); 
 }
 
 .boss-visual-row { width: 100%; z-index: var(--z-ui-base); position: relative; }
@@ -285,7 +399,6 @@ body {
 .condition-tag.ban { background: #fadbd8; color: #c0392b; border: 1px solid #e6b0aa; }
 .condition-tag.buff { background: #d5f5e3; color: #27ae60; border: 1px solid #a9dfbf; }
 
-/* MODIFIED: Tooltip controlled by .active class instead of :hover */
 .condition-tag .tooltip-text {
     visibility: hidden; width: 140px; 
     background-color: #333; color: #fff; 
@@ -323,12 +436,12 @@ body {
     border-radius: 8px;
 }
 
-/* Control Bottom Row - FIX: Fixed Height */
+/* Control Bottom Row */
 .control-bottom-row {
     display: grid;
     grid-template-columns: 100px 1fr 1fr; 
     gap: 15px;
-    height: 60px; /* Fixed height to prevent growth */
+    height: 60px; 
     align-items: center;
 }
 
@@ -355,32 +468,20 @@ body {
 }
 .storage-container.disabled { opacity: 0.4; }
 
-/* FIX: Button Styles for Stability */
+/* Buttons */
 .btn-action {
     border: none; border-radius: 8px; color: #fff; font-weight: 900; font-size: 0.9rem;
     cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: all 0.1s; height: 100%;
-    
-    /* Flex to stack text safely */
-    display: flex; 
-    flex-direction: column; 
-    justify-content: center; 
-    align-items: center;
-    line-height: 1.1;
-    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    line-height: 1.1; overflow: hidden;
 }
 .btn-action:active { transform: translateY(4px); box-shadow: none; }
 .btn-action:disabled { 
     background: #333 !important; color: #777 !important; cursor: not-allowed; 
     transform: none; box-shadow: none; border-bottom: 4px solid #222 !important; opacity: 0.6;
 }
-.btn-sub { 
-    font-size: 0.6rem; 
-    color: rgba(255,255,255,0.7); 
-    font-weight: normal; 
-    margin-top: 2px; 
-    white-space: nowrap;
-}
+.btn-sub { font-size: 0.6rem; color: rgba(255,255,255,0.7); font-weight: normal; margin-top: 2px; white-space: nowrap; }
 
 .btn-action.reroll { background: #7f8c8d; border-bottom: 4px solid #555; }
 .btn-action.confirm { background: #27ae60; box-shadow: 0 4px 0 #219150; border-bottom: 4px solid #219150; }
@@ -400,7 +501,7 @@ body {
 .dice.ghost { border: 2px dashed #2ecc71; background: rgba(46, 204, 113, 0.1); color: #2ecc71; box-shadow: none; }
 .dice.echo { border-color: #00e5ff; box-shadow: 0 0 8px #00e5ff; }
 
-/* --- 5. Hand Area --- */
+/* Hand Area */
 .hand-area {
     grid-area: hand; background: rgba(0,0,0,0.3);
     overflow-x: auto; padding: 20px 10px; display: flex; align-items: center;
@@ -419,15 +520,7 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s;
 }
 .hand-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-
-/* Disabled Hand Card Style */
-.hand-card.disabled { 
-    opacity: 0.4 !important; 
-    filter: grayscale(1) !important; 
-    cursor: not-allowed !important; 
-    border-color: #444 !important; 
-    box-shadow: none !important; 
-}
+.hand-card.disabled { opacity: 0.4 !important; filter: grayscale(1) !important; cursor: not-allowed !important; border-color: #444 !important; box-shadow: none !important; }
 .hand-card.disabled:hover { transform: none !important; border-color: #444 !important; }
 
 .hand-card .card-cost { 
@@ -441,7 +534,7 @@ body {
 .hand-card .card-desc { display: block; font-size: 0.6rem; color: #bdc3c7; margin-top: auto; text-align: center; line-height: 1.1; padding: 0 2px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .hand-card.target-valid { border-color: var(--target-glow); box-shadow: 0 0 10px var(--target-glow); }
 
-/* --- 6. Player Area --- */
+/* Player Area */
 .player-area {
     grid-area: player; background: #2c3e50; border-top: 2px solid var(--player-color);
     display: grid; grid-template-columns: 80px 1fr 50px; gap: 2px;
@@ -449,19 +542,13 @@ body {
 }
 .player-avatar {
     width: 70px; height: 70px;
-    
-    /* [MODIFIED] Point to local assets folder */
     background: #333 url('assets/hero.png') no-repeat center;
-    
     background-size: cover; 
-    border: 2px solid #fff; border-radius: 8px;
+    border-radius: 8px;
     position: absolute; bottom: 10px; left: 10px;
     transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.6); z-index: var(--z-floating);
 }
-.player-stats-col { 
-    grid-column: 2; display: flex; flex-direction: column; justify-content: center; gap: 3px; 
-    position: relative; width: 100%; 
-}
+.player-stats-col { grid-column: 2; display: flex; flex-direction: column; justify-content: center; gap: 3px; position: relative; width: 100%; }
 .player-name-row { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; color: #fff; }
 .stats-text-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-family: monospace; color: #ecf0f1; }
 
@@ -474,30 +561,15 @@ body {
 .pile-info-col { display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-end; }
 .mini-pile { font-size: 0.6rem; color: #ecf0f1; background: #34495e; padding: 2px 4px; border-radius: 2px; border: 1px solid #7f8c8d; text-align: center; width: 40px; }
 
-/* [NEW] Reserve Stat Style */
-.reserve-stat {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: bold;
-    color: #bdc3c7;
-    margin-left: 8px; /* Little spacing from MP */
-}
+/* Reserve Stat Style */
+.reserve-stat { display: flex; align-items: center; gap: 4px; font-weight: bold; color: #bdc3c7; margin-left: 8px; }
 
-/* Common */
-.hp-container { 
-    height: 22px; background: #555; border: 1px solid #444; border-radius: 4px; overflow: hidden; width: 100%; 
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); position: relative; 
-}
+/* HP Bar */
+.hp-container { height: 22px; background: #555; border: 1px solid #444; border-radius: 4px; overflow: hidden; width: 100%; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); position: relative; }
 .hp-fill { height: 100%; transition: width 0.3s; }
 .hp-fill.p { background: linear-gradient(90deg, #3498db, #2980b9); }
 .hp-fill.e { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-
-.hp-text-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 0.8rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; z-index: 5;
-}
+.hp-text-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; z-index: 5; }
 
 .buff-row { display: flex; gap: 4px; min-height: 16px; flex-wrap: wrap; margin-top: 4px; }
 .buff-tag { font-size: 0.65rem; padding: 0 4px; border-radius: 2px; color: #fff; font-weight: bold; }
@@ -544,7 +616,6 @@ body {
 .t-sys { color: var(--primary); }
 .t-hint { color: var(--player-color); }
 
-/* UPDATE: Next Button Style */
 #btn-next {
     font-size: 1.2rem;
     padding: 12px 30px;
