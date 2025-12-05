@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Project YatyzBank</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+
+    <div id="scene-menu" class="scene">
+        <div id="btn-lang" class="btn-icon menu-lang-btn">🌐 中/En</div>
+
+        <div class="menu-container">
+            <h1 class="game-title">Project<br>YatyzBank</h1>
+            <div class="difficulty-header">SELECT BOSS TARGET</div>
+            <div class="poster-container">
+                <div class="bounty-poster easy" onclick="selectDifficulty('easy')">
+                    <div class="poster-pin">📍</div>
+                    <div class="wanted-title">BOSS</div>
+                    <div class="boss-icon">👺</div>
+                    <div class="boss-name" data-key="boss_easy">Goblin Rogue</div>
+                    <div class="boss-stats">HP: 1500</div>
+                </div>
+                <div class="bounty-poster normal" onclick="selectDifficulty('normal')">
+                    <div class="poster-pin">📍</div>
+                    <div class="wanted-title">BOSS</div>
+                    <div class="boss-icon">👹</div>
+                    <div class="boss-name" data-key="boss_normal">Orc Warrior</div>
+                    <div class="boss-stats">HP: 2000</div>
+                </div>
+                <div class="bounty-poster hard" onclick="selectDifficulty('hard')">
+                    <div class="poster-pin">📍</div>
+                    <div class="wanted-title">BOSS</div>
+                    <div class="boss-icon">🐉</div>
+                    <div class="boss-name" data-key="boss_hard">Red Dragon</div>
+                    <div class="boss-stats">HP: 3000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scene-game" class="scene hidden">
+        <div class="game-layout">
+            
+            <div class="header-area">
+                <div class="header-left">
+                    <button id="btn-log-toggle" class="btn-icon">📜 Log</button>
+                    <div id="deck-info" class="info-pill">Deck: --</div>
+                </div>
+                <div class="header-right">
+                    <button id="btn-back-menu" class="btn-icon danger">Exit</button>
+                </div>
+            </div>
+
+            <div class="boss-area">
+                <div class="boss-info-row">
+                    <div class="boss-name-container">
+                        <span id="e-name">BOSS NAME</span>
+                        <span id="e-init" class="initiative-badge" style="display:none;">First</span>
+                    </div>
+                </div>
+                
+                <div class="boss-visual-row">
+                    <div class="boss-stats-col">
+                        <div class="hp-container">
+                            <div class="hp-fill e" id="hp-bar-e" style="width: 100%;"></div>
+                            <div id="hp-text-e" class="hp-text-overlay">2000 / 2000</div>
+                        </div>
+                        <div id="e-buffs" class="buff-row"></div>
+                    </div>
+                    <div class="boss-avatar-placeholder"></div>
+                </div>
+
+                <div class="boss-dice-row">
+                    <div id="e-status" class="boss-status-text">REROLL: 2</div>
+                    <div class="dice-row" id="e-dice"></div>
+                </div>
+            </div>
+
+            <div class="board-area">
+                <div id="instruction-text" class="instruction-banner"></div>
+                <div class="bounty-board" id="bounty-board"></div>
+            </div>
+
+            <div class="control-area">
+                <div class="main-dice-zone">
+                    <div class="dice-row" id="p-dice"></div>
+                </div>
+                <div class="control-bottom-row">
+                    <div class="reserve-zone">
+                        <div class="zone-label">BANK</div>
+                        <div class="storage-container" id="storage-container">
+                            <div class="storage-slot" id="storage-0"></div>
+                            <div class="storage-slot" id="storage-1"></div>
+                        </div>
+                    </div>
+                    <button id="btn-reroll" class="btn-action big-btn reroll">REROLL</button>
+                    <button id="btn-action" class="btn-action big-btn confirm">LOCK HAND</button>
+                </div>
+            </div>
+
+            <div class="hand-area">
+                <div class="hand-container" id="hand-container"></div>
+            </div>
+
+            <div class="player-area">
+                <div class="player-avatar">👤</div>
+                <div class="player-stats-col">
+                    <div class="player-name-row">
+                        <span id="p-init" class="initiative-badge" style="display:none;">First</span>
+                        </div>
+                    
+                    <div class="hp-container">
+                        <div class="hp-fill p" id="hp-bar-p" style="width: 100%;"></div>
+                        <div id="hp-text-p" class="hp-text-overlay">2000 / 2000</div>
+                    </div>
+
+                    <div class="stats-text-row">
+                        <div class="mana-container">
+                            <div class="mana-pills" id="mana-crystals"></div>
+                            <span class="mana-text"><span id="p-mp-val">2</span>/<span id="p-mp-max">10</span></span>
+                        </div>
+                    </div>
+                    <div id="p-buffs" class="buff-row"></div>
+                </div>
+                <div class="pile-info-col">
+                    <div id="hand-draw-pile" class="mini-pile">Deck: 10</div>
+                    <div id="hand-discard-pile" class="mini-pile discard">Disc: 0</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="overlay" id="log-modal" style="z-index: 200;">
+            <div class="result-card" style="width: 350px;">
+                <span class="close-btn" id="btn-close-log">×</span>
+                <h2>Battle Log</h2>
+                <div class="log-panel" id="log" style="height: 300px; margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="overlay" id="deck-modal" style="z-index: 200;">
+            <div class="result-card" style="width: 350px;">
+                <span class="close-btn" id="btn-close-deck">×</span>
+                <h2 data-key="deck_stats">Deck Stats</h2>
+                <table class="deck-table">
+                    <thead><tr><th>Combo</th><th>ATK</th><th>Left</th></tr></thead>
+                    <tbody id="deck-stats-content"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="overlay" id="overlay">
+            <div class="result-card">
+                <h2 id="round-title" data-key="round_end">Round End</h2>
+                <div id="round-summary"></div>
+                <br>
+                <button id="btn-next" data-key="next_btn">Next Round</button>
+                <button id="btn-restart" style="display:none;" data-key="restart_btn">Restart</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="effects.js"></script>
+    <script src="monsters.js"></script>
+    <script src="game-core.js"></script>
+    <script src="game-states.js"></script>
+    <script src="game-ui.js"></script>
+</body>
+</html>
