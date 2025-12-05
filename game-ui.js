@@ -136,11 +136,8 @@ const UIManager = {
     },
 
     render() {
-        // [MODIFIED] Update text first to handle menu language toggle
         this.updateText();
-        
         if (currentState instanceof MenuState) return;
-        
         this.renderHP();
         this.renderBoard(); 
         this.renderPlayer();
@@ -159,11 +156,17 @@ const UIManager = {
         const deckInfo = document.getElementById('deck-info');
         if(deckInfo) deckInfo.innerText = `BoardDeck: ${model.deck.length}`;
 
-        const pInit = document.getElementById('p-init');
-        const eInit = document.getElementById('e-init');
-        if(pInit && eInit) {
-            if (model.initiative === 'player') { pInit.style.display='inline-block'; eInit.style.display='none'; }
-            else { pInit.style.display='none'; eInit.style.display='inline-block'; }
+        // [MODIFIED] Logic to toggle the new First Hand labels
+        const pInitLabel = document.getElementById('p-init-label');
+        const eInitLabel = document.getElementById('e-init-label');
+        if(pInitLabel && eInitLabel) {
+            if (model.initiative === 'player') { 
+                pInitLabel.style.display = 'block'; 
+                eInitLabel.style.display = 'none'; 
+            } else { 
+                pInitLabel.style.display = 'none'; 
+                eInitLabel.style.display = 'block'; 
+            }
         }
 
         const resContainer = document.getElementById('storage-container');
