@@ -175,7 +175,6 @@ const UIManager = {
         const eName = document.getElementById('e-name');
         if(eName) eName.innerText = t(profile.nameKey); 
         
-        // [MODIFIED] Inject Boss Image
         const bossArea = document.querySelector('.boss-area');
         if (bossArea && profile.img) {
             bossArea.style.setProperty('--boss-img', `url('${profile.img}')`);
@@ -434,7 +433,6 @@ const UIManager = {
         
         const statusEl = document.getElementById('e-status');
         if (statusEl) {
-            // [MODIFIED] Simplified text logic and positioning updates
             if (currentState instanceof EnemyRollState) {
                 statusEl.innerText = `REROLL: ${model.eRerolls}`;
                 statusEl.style.color = '#f1c40f'; // Highlight
@@ -511,12 +509,10 @@ const UIManager = {
             if (tags.length > 2) cardEl.style.minHeight = "220px";
             cardEl.querySelector('.card-content').innerHTML = condHTML;
 
-            // [MODIFIED] Bind click for Tooltip auto-hide logic
             const tagEls = cardEl.querySelectorAll('.condition-tag');
             tagEls.forEach(tag => {
                 tag.onclick = (e) => {
                     e.stopPropagation();
-                    // Close others
                     document.querySelectorAll('.condition-tag.active').forEach(t => {
                         if(t !== tag) t.classList.remove('active');
                     });
@@ -591,33 +587,32 @@ const UIManager = {
         rerollBtn.style.display = 'flex'; 
         
         actionBtn.disabled = true;
-        actionBtn.innerHTML = `LOCK HAND<br><span class="btn-sub">WAITING</span>`;
+        actionBtn.innerText = `WAITING`; 
         actionBtn.className = "btn-action big-btn";
         actionBtn.style.display = 'flex';
 
         if (currentState instanceof PlayerRollState) {
             rerollBtn.disabled = (!currentState.isFirst && model.pRerolls <= 0);
-            const rerollText = currentState.isFirst ? t('roll_btn') : `${t('reroll_btn')}`;
-            const rerollSub = currentState.isFirst ? 'START' : `x${model.pRerolls}`;
-            rerollBtn.innerHTML = `${rerollText}<br><span class="btn-sub">${rerollSub}</span>`;
+            // [MODIFIED] Logic: First roll -> "Roll Dice", Subsequent -> "Reroll"
+            rerollBtn.innerText = currentState.isFirst ? t('roll_btn') : t('reroll_btn');
             
             actionBtn.disabled = currentState.isFirst; 
-            actionBtn.innerHTML = `${t('lock_btn')}<br><span class="btn-sub">CONFIRM</span>`;
+            actionBtn.innerText = t('lock_btn');
             actionBtn.className = "btn-action big-btn confirm"; 
 
         } else if (currentState instanceof SelectionState) {
             rerollBtn.disabled = true; 
-            rerollBtn.innerHTML = `REROLL<br><span class="btn-sub">--</span>`;
+            rerollBtn.innerText = t('reroll_btn');
             
             actionBtn.disabled = false;
             
             if (currentState.noMove) {
-                actionBtn.innerHTML = `${t('skip_btn')}<br><span class="btn-sub">NO MOVES</span>`;
+                actionBtn.innerText = t('end_turn_btn'); 
                 actionBtn.className = "btn-action big-btn danger";
             } else {
+                // [MODIFIED] Always "End Turn" regardless of initiative
+                actionBtn.innerText = t('end_turn_btn'); 
                 actionBtn.className = "btn-action big-btn confirm";
-                if (model.initiative === 'enemy') actionBtn.innerHTML = `${t('confirm_fight_btn')}<br><span class="btn-sub">CLASH</span>`;
-                else actionBtn.innerHTML = `${t('end_turn_btn')}<br><span class="btn-sub">PASS TURN</span>`;
             }
             
             if (currentState.subPhase === 'locked') actionBtn.disabled = true;
@@ -626,7 +621,7 @@ const UIManager = {
             rerollBtn.disabled = true;
             
             actionBtn.disabled = false;
-            actionBtn.innerHTML = `CANCEL<br><span class="btn-sub">BACK</span>`;
+            actionBtn.innerText = "CANCEL";
             actionBtn.className = "btn-action big-btn danger";
         }
     },

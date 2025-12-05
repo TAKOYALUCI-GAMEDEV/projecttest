@@ -128,7 +128,6 @@ body {
     
     background-color: #666; /* Fallback color */
     
-    /* [MODIFIED] Removed dashed border, added border-radius */
     padding: 0;
     border: none;
     border-radius: 0; 
@@ -226,6 +225,7 @@ body {
     font-size: 0.9rem;
     cursor: pointer;
     font-family: sans-serif;
+    border-radius: 4px;
 }
 
 /* ==========================================================================
@@ -283,7 +283,7 @@ body {
     pointer-events: none;
 }
 
-/* Initiative Label Style - Small */
+/* Initiative Label Style */
 .initiative-label {
     position: absolute;
     bottom: 115%;
@@ -306,26 +306,16 @@ body {
 .initiative-label::after {
     content: '';
     position: absolute;
-    bottom: -4px; 
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 4px 4px 0; 
-    border-style: solid;
+    bottom: -4px; left: 50%; transform: translateX(-50%);
+    border-width: 4px 4px 0; border-style: solid;
     border-color: #f1c40f transparent transparent transparent;
 }
 
-/* --- BOSS Initiative Label Override --- */
-.boss-name-container .initiative-label {
-    left: 0;
-    transform: none; 
-}
-.boss-name-container .initiative-label::after {
-    left: 20px; 
-    transform: none;
-}
+/* Boss Init Label */
+.boss-name-container .initiative-label { left: 0; transform: none; }
+.boss-name-container .initiative-label::after { left: 20px; transform: none; }
 
-/* --- [MODIFIED] PLAYER Initiative Label Override --- */
-/* Now positioned relative to .player-stats-col */
+/* Player Init Label (Adjusted for protruding layout) */
 .player-stats-col .initiative-label {
     left: 50%; 
     top: -24px; /* Move above HP Bar */
@@ -346,7 +336,9 @@ body {
     z-index: var(--z-floating); 
 }
 .boss-dice-row .dice-row {
-    background: rgba(0, 0, 0, 0.8); padding: 6px 12px;
+    /* [MODIFIED] Dark Red Transparent Background */
+    background: rgba(52, 0, 0, 0.499); 
+    padding: 6px 12px;
     border-radius: 20px; border: 1px solid var(--enemy-red);
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
@@ -371,6 +363,7 @@ body {
     border-radius: 8px; border: 4px solid transparent; 
     position: relative; transition: transform 0.1s;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3); opacity: 1;
+    border-radius: 0;
 }
 .card-inner { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 6px; }
 .bounty-dmg { font-size: 1.6rem; font-weight: 900; color: var(--accent); line-height: 1; margin-top: 5px; }
@@ -379,7 +372,6 @@ body {
 
 .bounty-card.dimmed { cursor: default; }
 .bounty-card.dimmed .card-inner { opacity: 0.6; filter: grayscale(1); }
-
 .bounty-card.selectable { border-color: var(--player-color); cursor: pointer; }
 .bounty-card.selectable:active { transform: scale(0.95); }
 .bounty-card.selected-p { border-color: var(--player-color); background: #fff; box-shadow: 0 0 15px var(--player-color); z-index: 2; }
@@ -424,7 +416,10 @@ body {
 
 .main-dice-zone { 
     display: flex; flex-direction: column; align-items: center; 
-    background: rgba(255,255,255,0.03); border-radius: 8px; padding: 5px;
+    /* [MODIFIED] Match Bank UI Blue & Border */
+    background: var(--card-bg); 
+    border: 2px solid #555;
+    border-radius: 8px; padding: 5px;
     width: 100%;
 }
 .dice-row { 
@@ -521,6 +516,7 @@ body {
     display: flex; flex-direction: column; align-items: center; 
     cursor: pointer; overflow: visible; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: all 0.2s;
+    border-radius: 0;
 }
 .hand-card:hover { transform: translateY(-5px); border-color: var(--primary); }
 .hand-card.disabled { opacity: 0.4 !important; filter: grayscale(1) !important; cursor: not-allowed !important; border-color: #444 !important; box-shadow: none !important; }
@@ -651,9 +647,10 @@ body {
 .t-sys { color: var(--primary); }
 .t-hint { color: var(--player-color); }
 
+/* [MODIFIED] Next Button Style */
 #btn-next {
-    font-size: 1.2rem;
-    padding: 12px 30px;
+    font-size: 0.8rem;
+    padding: 8px 20px;
     background-size: cover;
     color: #000;
     border: 2px solid #fff;
@@ -661,5 +658,6 @@ body {
     font-weight: 900;
     text-transform: uppercase;
     margin-top: 10px;
+    border-radius: 8px;
 }
 #btn-next:hover { transform: scale(1.05); }

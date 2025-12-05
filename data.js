@@ -18,9 +18,19 @@ let currentLang = 'en';
 const TEXTS = {
     zh: {
         boss_hand: "🤖 BOSS 手牌", player_hand: "👤 你的手牌", drag_here: "DRAG HERE",
-        roll_btn: "擲骰子 (Start)", reroll_btn: "重擲", lock_btn: "鎖定手牌",
-        confirm_btn: "確認選擇", confirm_fight_btn: "確認並戰鬥", end_turn_btn: "結束選擇 (換BOSS)",
-        skip_btn: "回合結束 (跳過)", next_btn: "下一回合", restart_btn: "重新開始", menu_btn: "回首頁",
+        
+        /* [MODIFIED] Button Texts */
+        roll_btn: "擲骰子", 
+        reroll_btn: "重擲", 
+        lock_btn: "鎖定手牌",   // 用於擲骰階段
+        end_turn_btn: "結束回合", // 用於選牌階段
+        
+        /* Unused but kept for safety */
+        confirm_btn: "確認選擇", 
+        confirm_fight_btn: "鎖定手牌", 
+        skip_btn: "結束回合", 
+        
+        next_btn: "下一回合", restart_btn: "重新開始", menu_btn: "回首頁",
         round_end: "回合結束", deck_stats: "🎴 牌庫詳情", combo_name: "組合名稱",
         atk_pow: "攻擊力", remaining: "剩餘", paused: "(遊戲暫停中)",
         log_start: "🔥 遊戲開始！", log_roll_hand: "你擲出了手牌。",
@@ -69,7 +79,7 @@ const TEXTS = {
             chain_tag: "🔗 右側連鎖 x{val}", chain_desc: "勝利時，右側卡片攻擊力倍率 x{val}",
             parity_tag: "☯️ 全奇/偶 x{val}", parity_desc: "若骰子全為奇數或全為偶數，傷害 x{val}",
             crit_tag: "🎰 機率 x{val}傷", crit_desc: "有 {chance} 機率造成 {val} 倍傷害",
-            overpower_tag: "⚔️ Tie = Win", overpower_desc: "Win ties instead of draw",
+            overpower_tag: "⚔️ 平手視為勝", overpower_desc: "改變平手判定，平手時視為玩家勝利",
             hidden_tag: "❓ 數值隱藏", hidden_desc: "進場時隱藏攻擊力",
             explode_tag: "💣 勝利炸毀鄰居", explode_desc: "勝利時移除左右兩側的卡片",
             steal_tag: "🧲 進場吸攻", steal_desc: "進場偷取左右卡片攻擊力",
@@ -86,9 +96,19 @@ const TEXTS = {
     },
     en: {
         boss_hand: "🤖 BOSS Hand", player_hand: "👤 Player Hand", drag_here: "DRAG HERE",
-        roll_btn: "Roll Dice (Start)", reroll_btn: "Reroll", lock_btn: "Lock Hand",
-        confirm_btn: "Confirm Selection", confirm_fight_btn: "Confirm & Fight", end_turn_btn: "End Turn (Pass to BOSS)",
-        skip_btn: "End Turn (Skip)", next_btn: "Next Round", restart_btn: "Restart Game", menu_btn: "Back to Menu",
+        
+        /* [MODIFIED] Button Texts */
+        roll_btn: "Roll Dice", 
+        reroll_btn: "Reroll", 
+        lock_btn: "Lock Hand", 
+        end_turn_btn: "End Turn",
+        
+        /* Unused but kept for safety */
+        confirm_btn: "Confirm Selection", 
+        confirm_fight_btn: "Lock Hand", 
+        skip_btn: "End Turn", 
+        
+        next_btn: "Next Round", restart_btn: "Restart Game", menu_btn: "Back to Menu",
         round_end: "Round End", deck_stats: "🎴 Deck Stats", combo_name: "Combo",
         atk_pow: "DMG", remaining: "Left", paused: "(Game Paused)",
         log_start: "🔥 Game Start!", log_roll_hand: "You rolled your hand.",
@@ -165,7 +185,6 @@ function tEff(key, replacements = {}) {
     return str;
 }
 
-// [MODIFIED] Added img paths
 const BOSS_PROFILES = {
     'easy': { 
         hp: 1500, 
