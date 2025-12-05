@@ -464,6 +464,16 @@ body {
 .pile-info-col { display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-end; }
 .mini-pile { font-size: 0.6rem; color: #ecf0f1; background: #34495e; padding: 2px 4px; border-radius: 2px; border: 1px solid #7f8c8d; text-align: center; width: 40px; }
 
+/* [NEW] Reserve Stat Style */
+.reserve-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    color: #bdc3c7;
+    margin-left: 8px; /* Little spacing from MP */
+}
+
 /* Common */
 .hp-container { 
     height: 22px; background: #555; border: 1px solid #444; border-radius: 4px; overflow: hidden; width: 100%; 

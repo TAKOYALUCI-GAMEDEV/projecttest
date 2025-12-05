@@ -156,7 +156,6 @@ const UIManager = {
         const deckInfo = document.getElementById('deck-info');
         if(deckInfo) deckInfo.innerText = `BoardDeck: ${model.deck.length}`;
 
-        // [MODIFIED] Logic to toggle the new First Hand labels
         const pInitLabel = document.getElementById('p-init-label');
         const eInitLabel = document.getElementById('e-init-label');
         if(pInitLabel && eInitLabel) {
@@ -180,6 +179,12 @@ const UIManager = {
         const pMpMax = document.getElementById('p-mp-max');
         if(pMpVal) pMpVal.innerText = model.pMP;
         if(pMpMax) pMpMax.innerText = model.pMaxMP;
+
+        // [NEW] Update Reserve Dice
+        const pResVal = document.getElementById('p-reserve-val');
+        const pResMax = document.getElementById('p-reserve-max');
+        if(pResVal) pResVal.innerText = model.reserveDice;
+        if(pResMax) pResMax.innerText = model.reserveDiceMax;
         
         this.renderManaCrystals();
     },
