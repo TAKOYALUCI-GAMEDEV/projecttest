@@ -146,7 +146,6 @@ body {
 }
 .boss-info-row { display: flex; justify-content: space-between; align-items: flex-end; z-index: var(--z-ui-base); margin-bottom: 5px; }
 
-/* [MODIFIED] Added relative positioning for the label */
 .boss-name-container { 
     font-weight: 900; font-size: 1.2rem; color: #fff; 
     text-shadow: 2px 2px 0 #000; letter-spacing: 1px; 
@@ -164,7 +163,7 @@ body {
     pointer-events: none;
 }
 
-/* [NEW] Initiative Label Style */
+/* Initiative Label Style - [MODIFIED] Reduced Size */
 .initiative-label {
     position: absolute;
     bottom: 115%; /* Position above the parent */
@@ -173,13 +172,13 @@ body {
     background-color: #f1c40f; /* Yellow */
     color: #000;
     font-weight: bold;
-    padding: 4px 8px;
+    padding: 2px 5px; /* [MODIFIED] Smaller padding */
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.6rem; /* [MODIFIED] Smaller font */
     z-index: 150;
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    text-shadow: none; /* [FIX] Remove inherited text shadow to prevent blurriness */
-    display: none; /* Hidden by default */
+    text-shadow: none; 
+    display: none; 
     text-transform: uppercase;
     white-space: nowrap;
     pointer-events: none;
@@ -188,14 +187,15 @@ body {
 .initiative-label::after {
     content: '';
     position: absolute;
-    bottom: -6px;
+    bottom: -4px; /* [MODIFIED] Adjusted for smaller arrow */
     left: 50%;
     transform: translateX(-50%);
-    border-width: 6px 6px 0;
+    border-width: 4px 4px 0; /* [MODIFIED] Smaller arrow */
     border-style: solid;
     border-color: #f1c40f transparent transparent transparent;
 }
-/* Specific tweaks for enemy name position */
+
+/* --- BOSS Initiative Label Override --- */
 .boss-name-container .initiative-label {
     left: 0;
     transform: none; /* Align left for text */
@@ -203,6 +203,16 @@ body {
 .boss-name-container .initiative-label::after {
     left: 20px; /* Adjust arrow to align with start of name */
     transform: none;
+}
+
+/* --- PLAYER Initiative Label Override --- */
+.player-avatar .initiative-label {
+    left: 0; /* Align with left edge of avatar to prevent cut-off */
+    transform: none; /* Disable centering */
+}
+.player-avatar .initiative-label::after {
+    left: 35px; /* Center of 70px avatar */
+    transform: translateX(-50%); /* Center arrow on that point */
 }
 
 .boss-visual-row { width: 100%; z-index: var(--z-ui-base); position: relative; }
