@@ -14,7 +14,7 @@ const MAX_HAND_SIZE = 12;      // 手牌堆疊上限
 const HAND_REFILL_TARGET = 4;  // 回合開始補牌目標
 
 // --- Localization ---
-let currentLang = 'en'; // [MODIFIED] Default changed to English
+let currentLang = 'en';
 const TEXTS = {
     zh: {
         boss_hand: "🤖 BOSS 手牌", player_hand: "👤 你的手牌", drag_here: "DRAG HERE",
@@ -69,7 +69,7 @@ const TEXTS = {
             chain_tag: "🔗 右側連鎖 x{val}", chain_desc: "勝利時，右側卡片攻擊力倍率 x{val}",
             parity_tag: "☯️ 全奇/偶 x{val}", parity_desc: "若骰子全為奇數或全為偶數，傷害 x{val}",
             crit_tag: "🎰 機率 x{val}傷", crit_desc: "有 {chance} 機率造成 {val} 倍傷害",
-            overpower_tag: "⚔️ 平手視為勝", overpower_desc: "改變平手判定，平手時視為玩家勝利",
+            overpower_tag: "⚔️ Tie = Win", overpower_desc: "Win ties instead of draw",
             hidden_tag: "❓ 數值隱藏", hidden_desc: "進場時隱藏攻擊力",
             explode_tag: "💣 勝利炸毀鄰居", explode_desc: "勝利時移除左右兩側的卡片",
             steal_tag: "🧲 進場吸攻", steal_desc: "進場偷取左右卡片攻擊力",
@@ -165,10 +165,29 @@ function tEff(key, replacements = {}) {
     return str;
 }
 
+// [MODIFIED] Added img paths
 const BOSS_PROFILES = {
-    'easy': { hp: 1500, nameKey: 'boss_easy', icon: '👺', aiTraits: { randomness: 0.3, greedy: 0.2, efficiency: 0.5 } },
-    'normal': { hp: 2000, nameKey: 'boss_normal', icon: '👹', aiTraits: { randomness: 0.1, greedy: 0.8, efficiency: 0.7 } },
-    'hard': { hp: 3000, nameKey: 'boss_hard', icon: '🐉', aiTraits: { randomness: 0.0, greedy: 0.6, efficiency: 1.2 } }
+    'easy': { 
+        hp: 1500, 
+        nameKey: 'boss_easy', 
+        icon: '👺', 
+        img: 'assets/boss_goblin.png', 
+        aiTraits: { randomness: 0.3, greedy: 0.2, efficiency: 0.5 } 
+    },
+    'normal': { 
+        hp: 2000, 
+        nameKey: 'boss_normal', 
+        icon: '👹', 
+        img: 'assets/boss_orc.png', 
+        aiTraits: { randomness: 0.1, greedy: 0.8, efficiency: 0.7 } 
+    },
+    'hard': { 
+        hp: 3000, 
+        nameKey: 'boss_hard', 
+        icon: '🐉', 
+        img: 'assets/boss_dragon.png', 
+        aiTraits: { randomness: 0.0, greedy: 0.6, efficiency: 1.2 } 
+    }
 };
 
 const CARD_CONFIG = {

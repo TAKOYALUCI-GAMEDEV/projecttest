@@ -175,12 +175,17 @@ const UIManager = {
         const eName = document.getElementById('e-name');
         if(eName) eName.innerText = t(profile.nameKey); 
         
+        // [MODIFIED] Inject Boss Image
+        const bossArea = document.querySelector('.boss-area');
+        if (bossArea && profile.img) {
+            bossArea.style.setProperty('--boss-img', `url('${profile.img}')`);
+        }
+        
         const pMpVal = document.getElementById('p-mp-val');
         const pMpMax = document.getElementById('p-mp-max');
         if(pMpVal) pMpVal.innerText = model.pMP;
         if(pMpMax) pMpMax.innerText = model.pMaxMP;
 
-        // [NEW] Update Reserve Dice
         const pResVal = document.getElementById('p-reserve-val');
         const pResMax = document.getElementById('p-reserve-max');
         if(pResVal) pResVal.innerText = model.reserveDice;
