@@ -29,8 +29,8 @@
 
     /* --- Z-INDEX LAYERS --- */
     --z-bg: 0;
-    --z-boss-img: 5;
-    --z-ui-base: 10;
+    --z-char-layer: 5;   /* Character Layer */
+    --z-ui-layer: 10;    /* HP Bar / Stats Layer */
     --z-floating: 50; 
     --z-vfx: 100;
     --z-overlay: 200;
@@ -120,7 +120,7 @@ body {
     align-items: center;
 }
 
-/* --- NEW CARD STYLE (Layered for Full Image) --- */
+/* --- BOSS CARD (Menu) --- */
 .boss-card {
     width: 90%; /* Relative width */
     height: auto; 
@@ -128,16 +128,15 @@ body {
     
     background-color: #666; /* Fallback color */
     
-    /* [FIX] Reset padding and border to ensure image fills edge-to-edge */
+    /* [MODIFIED] Removed dashed border, added border-radius */
     padding: 0;
     border: none;
     border-radius: 0; 
-    
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Optional: slight shadow for depth */
     
     position: relative; /* Context for absolute children */
     cursor: pointer;
-    overflow: hidden; 
+    overflow: hidden; /* Ensures image respects border-radius */
     transition: transform 0.2s;
 }
 .boss-card:active { transform: scale(0.98); }
@@ -150,15 +149,15 @@ body {
     width: 100%; 
     height: 100%;
     z-index: 0; /* Behind text */
-    margin: 0; /* Ensure no margin */
-    padding: 0; /* Ensure no padding */
+    margin: 0; 
+    padding: 0;
 }
 
 .boss-banner-img {
-    display: block; /* [FIX] Removes bottom space caused by inline nature */
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Fill the area completely */
+    object-fit: cover; /* Fill the area */
     object-position: center;
     border: none;
 }
@@ -182,7 +181,7 @@ body {
 .boss-name-menu {
     font-family: 'Times New Roman', serif;
     font-size: 1.4rem;
-    color: #fff; 
+    color: #fff; /* Changed to white for better contrast over dark gradient */
     text-transform: uppercase;
     font-weight: bold;
     line-height: 1.1;
@@ -325,14 +324,18 @@ body {
     transform: none;
 }
 
-/* --- PLAYER Initiative Label Override --- */
-.player-avatar .initiative-label {
-    left: 0; 
-    transform: none; 
-}
-.player-avatar .initiative-label::after {
-    left: 35px; 
+/* --- [MODIFIED] PLAYER Initiative Label Override --- */
+/* Now positioned relative to .player-stats-col */
+.player-stats-col .initiative-label {
+    left: 50%; 
+    top: -24px; /* Move above HP Bar */
+    bottom: auto;
     transform: translateX(-50%); 
+}
+.player-stats-col .initiative-label::after {
+    left: 50%; 
+    transform: translateX(-50%); 
+    bottom: -4px;
 }
 
 .boss-visual-row { width: 100%; z-index: var(--z-ui-base); position: relative; }
@@ -534,21 +537,50 @@ body {
 .hand-card .card-desc { display: block; font-size: 0.6rem; color: #bdc3c7; margin-top: auto; text-align: center; line-height: 1.1; padding: 0 2px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
 .hand-card.target-valid { border-color: var(--target-glow); box-shadow: 0 0 10px var(--target-glow); }
 
-/* Player Area */
+/* --- 6. Player Area (Layered Layout) --- */
 .player-area {
     grid-area: player; background: #2c3e50; border-top: 2px solid var(--player-color);
-    display: grid; grid-template-columns: 80px 1fr 50px; gap: 2px;
-    padding: 5px 15px; position: relative; z-index: var(--z-ui-base);
+    display: grid; 
+    grid-template-columns: 100px 1fr 50px; 
+    gap: 2px;
+    padding: 5px 15px; 
+    position: relative; 
+    z-index: var(--z-ui-base);
+    overflow: visible; /* [IMPORTANT] Allow character to stick out top */
 }
+
+/* [MODIFIED] Player Avatar - Layered Behind UI */
 .player-avatar {
-    width: 70px; height: 70px;
-    background: #333 url('assets/hero.png') no-repeat center;
-    background-size: cover; 
-    border-radius: 8px;
-    position: absolute; bottom: 10px; left: 10px;
-    transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.6); z-index: var(--z-floating);
+    position: absolute; /* Break out of grid flow */
+    bottom: 0;
+    left: 0;
+    width: 130px; /* Wider to accommodate art */
+    height: 140%; /* Taller than container to pop out */
+    
+    /* Using background-size: contain to show full cutout */
+    background: url('assets/hero.png') no-repeat bottom left; 
+    background-size: contain; 
+    
+    border-radius: 0; /* No rounded corners */
+    box-shadow: none; /* No shadow */
+    background-color: transparent; /* Transparent background */
+    z-index: var(--z-char-layer); /* Layer 5 */
 }
-.player-stats-col { grid-column: 2; display: flex; flex-direction: column; justify-content: center; gap: 3px; position: relative; width: 100%; }
+
+/* [MODIFIED] Stats Column - Layered Above Character + Overlap */
+.player-stats-col { 
+    grid-column: 2; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    gap: 3px; 
+    position: relative; 
+    width: 100%; 
+    z-index: var(--z-ui-layer); /* Layer 10 (Above Char) */
+    padding-left: 0; /* Clear previous padding */
+    margin-left: -8px; /* [MODIFIED] Pull left to overlap the avatar */
+}
+
 .player-name-row { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; color: #fff; }
 .stats-text-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-family: monospace; color: #ecf0f1; }
 
@@ -558,7 +590,10 @@ body {
 .mana-crystal.pop-anim { animation: manaPop 0.4s ease-out; }
 @keyframes manaPop { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.8); filter: brightness(2); } 100% { transform: scale(1); filter: brightness(1); } }
 
-.pile-info-col { display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-end; }
+.pile-info-col { 
+    display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-end; 
+    position: relative; z-index: var(--z-ui-layer); /* Ensure pile info is also on top */
+}
 .mini-pile { font-size: 0.6rem; color: #ecf0f1; background: #34495e; padding: 2px 4px; border-radius: 2px; border: 1px solid #7f8c8d; text-align: center; width: 40px; }
 
 /* Reserve Stat Style */
