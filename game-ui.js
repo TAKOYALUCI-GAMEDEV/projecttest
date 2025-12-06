@@ -42,6 +42,83 @@ const UIManager = {
             bus.emit('changeState', new RoundSetupState(model));
         });
 
+        // --- DEBUG PANEL LOGIC START ---
+        bindClick('btn-show-debug', () => document.getElementById('debug-overlay').classList.remove('hidden'));
+        bindClick('btn-hide-debug', () => document.getElementById('debug-overlay').classList.add('hidden'));
+
+        // 1. 初始化下拉選單
+        const initDebugMenus = () => {
+            // 手牌選單
+            const handSel = document.getElementById('debug-hand-select');
+            if (handSel && HAND_CARDS_DATABASE) {
+                handSel.innerHTML = HAND_CARDS_DATABASE.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            }
+            // 場地卡選單
+            const boardSel = document.getElementById('debug-board-select');
+            if (boardSel && CARD_CONFIG) {
+                let opts = '';
+                // 一般卡
+                Object.keys(CARD_CONFIG).forEach(key => opts += `<option value="${key}|">${cName(key)} (No Special)</option>`);
+                // 特殊卡
+                if (typeof SPECIAL_CARDS_DATA !== 'undefined') {
+                    SPECIAL_CARDS_DATA.forEach(s => {
+                        opts += `<option value="TwoPairs|${s.id}">✨ ${s.id} (TwoPairs)</option>`;
+                    });
+                }
+                boardSel.innerHTML = opts;
+            }
+        };
+        setTimeout(initDebugMenus, 1000); // 延遲一下確保資料載入
+
+        // 2. 補滿資源按鈕
+        bindClick('btn-debug-refill', () => {
+            model.pMP = 10;
+            model.pDice = [6,6,6,6,6,6];
+            model.pHeld = [false, false, false, false, false, false];
+            bus.emit('updateUI');
+            bus.emit('log', {msg: '⚡ DEBUG: Resources Refilled', cls: 't-sys'});
+        });
+
+        // 3. 加入手牌按鈕
+        bindClick('btn-debug-draw', () => {
+            const cardId = document.getElementById('debug-hand-select').value;
+            const proto = HAND_CARDS_DATABASE.find(c => c.id === cardId);
+            if (proto) {
+                const newCard = { ...proto, uid: `debug-${Math.random()}`, currentCost: proto.cost };
+                model.pHand.push(newCard);
+                bus.emit('updateUI');
+                bus.emit('log', {msg: `🎴 DEBUG: Added ${proto.name}`, cls: 't-sys'});
+            }
+        });
+
+        // 4. 生成場地卡按鈕
+        bindClick('btn-debug-spawn', () => {
+            const slot = parseInt(document.getElementById('debug-slot-select').value);
+            const val = document.getElementById('debug-board-select').value;
+            const [combo, special] = val.split('|');
+            
+            const baseConf = CARD_CONFIG[combo];
+            let effects = [];
+            if (special && special !== 'undefined') {
+                const sDef = SPECIAL_CARDS_DATA.find(s => s.id === special);
+                if (sDef) effects = sDef.effects;
+            }
+
+            const newCard = {
+                uid: `debug-board-${Math.random()}`,
+                comboType: combo,
+                specialId: special || null,
+                dmg: baseConf ? baseConf.dmg : 100,
+                baseDmg: baseConf ? baseConf.dmg : 100,
+                effects: effects,
+                isNew: true
+            };
+            model.board[slot] = newCard;
+            bus.emit('updateUI');
+            bus.emit('log', {msg: `🗺️ DEBUG: Spawning ${combo} at Slot ${slot}`, cls: 't-sys'});
+        });
+        // --- DEBUG PANEL LOGIC END ---
+
         bus.on('log', (data) => this.log(data.msg, data.cls));
         bus.on('clearLog', () => {
             const el = document.getElementById('log');
@@ -231,7 +308,7 @@ const UIManager = {
         if (pBuffContainer) {
             let buffHTML = '';
             if (model.pShield > 0) buffHTML += `<span class="buff-tag shield">🛡️ ${model.pShield}</span>`;
-            if (model.vitalEssenceActive) buffHTML += `<span class="buff-tag heal">✨ Vital</span>`;
+            if (model.vitalEssenceActive > 0) buffHTML += `<span class="buff-tag heal">✨ Vital x${model.vitalEssenceActive}</span>`;
             pBuffContainer.innerHTML = buffHTML;
         }
 
@@ -379,6 +456,18 @@ const UIManager = {
             let cls = 'hand-card';
             let isDisabled = false;
 
+            // [MODIFIED] Weighted Fate: 檢查目標重擲次數是否已經 <= 0
+            if (card.id === 'weighted_fate') {
+                const isFuture = (currentState instanceof SelectionState || currentState instanceof ResolveState);
+                const base = REROLL_COUNT;
+                const currentMod = isFuture ? model.nextTurnEnemyRerollMod : model.eRerollMod;
+                
+                // 如果目前修正後的值已經 <= 0，禁止使用
+                if ((base + currentMod) <= 0) {
+                    isDisabled = true;
+                }
+            }
+
             if (card.effects && card.effects[0].targetType === 'dice') {
                 if (currentState instanceof PlayerRollState && currentState.isFirst) {
                     isDisabled = true;
@@ -420,6 +509,7 @@ const UIManager = {
     },
 
     renderEnemy() {
+        // ... (existing dice render)
         const div = document.getElementById('e-dice'); 
         if(div) {
             div.innerHTML='';
@@ -433,16 +523,53 @@ const UIManager = {
         
         const statusEl = document.getElementById('e-status');
         if (statusEl) {
-            if (currentState instanceof EnemyRollState) {
-                statusEl.innerText = `REROLL: ${model.eRerolls}`;
-                statusEl.style.color = '#f1c40f'; // Highlight
+            let mainText = '';
+            let subText = '';
+
+            // [MODIFIED] Check if we should show actual remaining dice (0) or projected max
+            let showActual = false;
+            
+            // Check major states
+            if (currentState instanceof EnemyRollState || currentState instanceof SelectionState || currentState instanceof ResolveState) {
+                showActual = true;
+            }
+            // Handle TargetingState: If targeting triggered during Selection, show actual. If during PlayerRoll, show projected.
+            if (currentState instanceof TargetingState) {
+                if (currentState.originalState instanceof SelectionState) showActual = true;
+            }
+
+            if (showActual) {
+                // Show actual remaining rerolls (e.g. 0)
+                mainText = `REROLL: ${model.eRerolls}`;
+                
+                // Highlight yellow only if currently rolling
+                if (currentState instanceof EnemyRollState) statusEl.style.color = '#f1c40f'; 
+                else statusEl.style.color = '#fff';
+
             } else {
+                // Show Projected (Base + Mod) for next round preview
                 const base = REROLL_COUNT;
                 const mod = model.eRerollMod;
                 const total = Math.max(0, base + mod);
-                statusEl.innerText = `REROLL: ${total}`;
+                let modStr = '';
+                if (mod !== 0) {
+                     const color = mod > 0 ? '#2ecc71' : '#e74c3c';
+                     modStr = ` <span style="font-size:0.8em; color:${color}">(${mod > 0 ? '+' : ''}${mod})</span>`;
+                }
+                mainText = `REROLL: ${total}${modStr}`;
                 statusEl.style.color = '#fff';
             }
+
+            // 2. Future/Next Turn Debuff Label
+            if (model.nextTurnEnemyRerollMod !== 0) {
+                const val = model.nextTurnEnemyRerollMod;
+                const sign = val > 0 ? '+' : '';
+                const color = val > 0 ? '#2ecc71' : '#e74c3c'; 
+                
+                subText = `<div style="font-size:0.65rem; color:${color}; margin-top:2px; text-transform:uppercase; white-space:nowrap;">NEXT REROLL ${sign}${val}</div>`;
+            }
+
+            statusEl.innerHTML = `<div>${mainText}</div>${subText}`;
         }
     },
 
@@ -593,8 +720,12 @@ const UIManager = {
 
         if (currentState instanceof PlayerRollState) {
             rerollBtn.disabled = (!currentState.isFirst && model.pRerolls <= 0);
-            // [MODIFIED] Logic: First roll -> "Roll Dice", Subsequent -> "Reroll"
-            rerollBtn.innerText = currentState.isFirst ? t('roll_btn') : t('reroll_btn');
+            // [MODIFIED] Display Reroll count if not first roll
+            if (currentState.isFirst) {
+                rerollBtn.innerText = t('roll_btn');
+            } else {
+                rerollBtn.innerText = `${t('reroll_btn')} (${model.pRerolls})`;
+            }
             
             actionBtn.disabled = currentState.isFirst; 
             actionBtn.innerText = t('lock_btn');
@@ -610,7 +741,7 @@ const UIManager = {
                 actionBtn.innerText = t('end_turn_btn'); 
                 actionBtn.className = "btn-action big-btn danger";
             } else {
-                // [MODIFIED] Always "End Turn" regardless of initiative
+                // [MODIFIED] Always use "End Turn"
                 actionBtn.innerText = t('end_turn_btn'); 
                 actionBtn.className = "btn-action big-btn confirm";
             }

@@ -54,7 +54,8 @@ class GameModel {
         
         // Buffs/Debuffs (Reset each round)
         this.nextTurnRerollBonus = 0;
-        this.vitalEssenceActive = false;
+        this.nextTurnEnemyRerollMod = 0; // [已新增] 敵人下回合重擲緩衝
+        this.vitalEssenceActive = 0;
         this.eAtkDebuff = 0;
         
         // --- Animation Flags ---
@@ -104,7 +105,8 @@ class GameModel {
         this.tempDiceMod = 0;
         this.eRerollMod = 0;
         this.nextTurnRerollBonus = 0;
-        this.vitalEssenceActive = false;
+        this.nextTurnEnemyRerollMod = 0; // [已新增] 重置
+        this.vitalEssenceActive = 0;
         this.eAtkDebuff = 0;
         this.justMaterializedCount = 0;
         

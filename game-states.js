@@ -63,8 +63,11 @@ class RoundSetupState extends GameState {
         this.game.tickBuffs();
         
         // Reset Round Specific Buffs
-        this.game.eRerollMod = 0;
-        this.game.vitalEssenceActive = false;
+        // [已修改] 將下回合的減益移轉到本回合，而不是直接歸零
+        this.game.eRerollMod = this.game.nextTurnEnemyRerollMod;
+        this.game.nextTurnEnemyRerollMod = 0;
+        
+        this.game.vitalEssenceActive = 0;
         this.game.eAtkDebuff = 0;
         
         // --- DICE LOGIC: Check Lucky Boost ---
@@ -656,15 +659,18 @@ class ResolveState extends GameState {
             }
         });
         
-        // --- Damage Application ---
-        if (this.game.vitalEssenceActive) {
+        // --- Damage Application (VITAL ESSENCE FIX) ---
+        if (this.game.vitalEssenceActive > 0) { // [已修改] 改為大於 0 的判斷
             let onesCount = 0;
             this.game.pDice.forEach(d => { if(d===1) onesCount++; });
             this.game.pStorage.forEach(s => { if(s && s.val===1) onesCount++; });
+            
             if (onesCount > 0) {
-                const heal = onesCount * 10;
+                const stacks = this.game.vitalEssenceActive;
+                const heal = onesCount * 10 * stacks; // [已修改] 乘上堆疊層數
                 this.game.pHP = Math.min(this.game.pMaxHP, this.game.pHP + heal);
-                summaryHTML += `<div class="result-row" style="color:#2ecc71;">Vital Essence: +${heal} HP (${onesCount}x1s)</div>`;
+                // [已修改] Log 顯示層數
+                summaryHTML += `<div class="result-row" style="color:#2ecc71;">Vital Essence (x${stacks}): +${heal} HP (${onesCount}x1s)</div>`;
             }
         }
 
@@ -699,7 +705,7 @@ class ResolveState extends GameState {
             this.game.pHP > 0 ? this.endGame(true) : this.endGame(false);
         } else {
             document.getElementById('btn-next').style.display = 'inline-block';
-            document.getElementById('btn-restart').style.display = 'none';
+            document.getElementById('btn-restart').style.display = 'inline-block'; // DEBUG NOTE: Restart enabled for ease
             const sumDiv = document.getElementById('round-summary');
             
             if (disarmReduced > 0) {

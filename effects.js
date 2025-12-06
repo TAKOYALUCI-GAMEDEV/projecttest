@@ -203,14 +203,25 @@ const EffectLibrary = {
     // HAND CARD EFFECTS (ASYNC & VISUALS)
     // ============================================================================
     
-    // Weighted Fate
+    // Weighted Fate (FIXED for persistent future turns)
     'mod_enemy_reroll': async (context, params) => {
         if(context.gameModel) {
-            context.gameModel.eRerollMod += params.value;
+            // 判斷當前狀態是否為「選牌階段」(代表敵人已經擲完骰子了)
+            const isFuture = (window.currentState && window.currentState.constructor.name === 'SelectionState');
+            
             const sign = params.value > 0 ? '+' : '';
             const color = params.value < 0 ? 'dmg' : 'heal'; 
             bus.emit('visual_effect', {type: 'float_text', target: 'enemy', text: `${sign}${params.value} Reroll`, color: color});
-            bus.emit('log', {msg: `🎯 Weighted Fate! Enemy rerolls ${sign}${params.value}`, cls: 't-sys'});
+
+            if (isFuture) {
+                // 敵人已行動，加到下回合緩衝區
+                context.gameModel.nextTurnEnemyRerollMod += params.value;
+                bus.emit('log', {msg: `🎯 Weighted Fate! Enemy NEXT turn rerolls ${sign}${params.value}`, cls: 't-sys'});
+            } else {
+                // 敵人尚未行動，直接修改當前
+                context.gameModel.eRerollMod += params.value;
+                bus.emit('log', {msg: `🎯 Weighted Fate! Enemy rerolls ${sign}${params.value}`, cls: 't-sys'});
+            }
             bus.emit('updateUI');
         }
     },
@@ -258,8 +269,9 @@ const EffectLibrary = {
     // Vital Essence
     'buff_vital_essence': async (context, params) => {
         if(context.gameModel) {
-            context.gameModel.vitalEssenceActive = true;
-            bus.emit('log', {msg: `✨ Vital Essence Active! (1s will heal you)`, cls: 't-sys'});
+            // [已修改] 改為數值累加
+            context.gameModel.vitalEssenceActive += 1;
+            bus.emit('log', {msg: `✨ Vital Essence Active! (Stack x${context.gameModel.vitalEssenceActive})`, cls: 't-sys'});
             bus.emit('updateUI');
         }
     },
