@@ -46,7 +46,7 @@ const UIManager = {
         bindClick('btn-show-debug', () => document.getElementById('debug-overlay').classList.remove('hidden'));
         bindClick('btn-hide-debug', () => document.getElementById('debug-overlay').classList.add('hidden'));
 
-        // 1. 初始化下拉選單
+        // 1. 初始化下拉選單 & 綁定按鈕
         const initDebugMenus = () => {
             // 手牌選單
             const handSel = document.getElementById('debug-hand-select');
@@ -59,24 +59,60 @@ const UIManager = {
                 let opts = '';
                 // 一般卡
                 Object.keys(CARD_CONFIG).forEach(key => opts += `<option value="${key}|">${cName(key)} (No Special)</option>`);
-                // 特殊卡
+                
+                // 特殊卡 - [MODIFIED] 使用標籤名稱
                 if (typeof SPECIAL_CARDS_DATA !== 'undefined') {
                     SPECIAL_CARDS_DATA.forEach(s => {
-                        opts += `<option value="TwoPairs|${s.id}">✨ ${s.id} (TwoPairs)</option>`;
+                        // 建立一個臨時物件來預覽標籤文字
+                        const tempObj = { 
+                            effects: s.effects,
+                            state: { targetVal: '?' } // 給命運骰子一個預設顯示值
+                        };
+                        
+                        // 取得該卡片的視覺標籤
+                        const tags = EffectProcessor.getVisualTags(tempObj);
+                        let labelText = s.id; // 預設顯示 ID
+                        
+                        if (tags && tags.length > 0) {
+                            // 使用第一個標籤的文字作為選項名稱 (去除 HTML 標籤若有的話)
+                            // 這裡我們直接拿 text，因為通常是純文字或簡單格式
+                            labelText = tags[0].text;
+                        }
+
+                        // 組合選項 HTML
+                        opts += `<option value="TwoPairs|${s.id}">[${labelText}] - ${s.id}</option>`;
                     });
                 }
                 boardSel.innerHTML = opts;
             }
+
+            // --- 新增：骰子組合按鈕綁定 ---
+            const setDice = (vals) => {
+                model.pDice = vals;
+                model.pHeld = Array(6).fill(false);
+                bus.emit('updateUI');
+                bus.emit('log', {msg: `🐞 DEBUG: Set Dice to [${vals}]`, cls: 't-sys'});
+            };
+
+            bindClick('btn-debug-pair', () => setDice([1,1,2,3,4,5]));
+            bindClick('btn-debug-2pair', () => setDice([2,2,3,3,1,6]));
+            bindClick('btn-debug-3kind', () => setDice([3,3,3,4,5,6]));
+            bindClick('btn-debug-fullhouse', () => setDice([4,4,4,5,5,1]));
+            bindClick('btn-debug-ministr', () => setDice([1,2,3,4,6,6]));
+            bindClick('btn-debug-bigstr', () => setDice([1,2,3,4,5,6]));
+            bindClick('btn-debug-4kind', () => setDice([6,6,6,6,1,2]));
+            bindClick('btn-debug-yahtzee', () => setDice([6,6,6,6,6,6]));
         };
         setTimeout(initDebugMenus, 1000); // 延遲一下確保資料載入
 
-        // 2. 補滿資源按鈕
+        // 2. 補滿資源按鈕 (MODIFIED: Only MP)
         bindClick('btn-debug-refill', () => {
             model.pMP = 10;
-            model.pDice = [6,6,6,6,6,6];
-            model.pHeld = [false, false, false, false, false, false];
+            // Removed dice resetting
+            // model.pDice = [6,6,6,6,6,6];
+            // model.pHeld = [false, false, false, false, false, false];
             bus.emit('updateUI');
-            bus.emit('log', {msg: '⚡ DEBUG: Resources Refilled', cls: 't-sys'});
+            bus.emit('log', {msg: '⚡ DEBUG: MP Refilled (10)', cls: 't-sys'});
         });
 
         // 3. 加入手牌按鈕
@@ -113,6 +149,17 @@ const UIManager = {
                 effects: effects,
                 isNew: true
             };
+            
+            // [MODIFIED] If card has roll_on_enter effect, trigger it immediately
+            if (newCard.effects) {
+                newCard.effects.forEach(eff => {
+                    if (eff.type === 'roll_on_enter') {
+                        if (!newCard.state) newCard.state = {};
+                        newCard.state[eff.key] = Math.floor(Math.random() * 6) + 1;
+                    }
+                });
+            }
+
             model.board[slot] = newCard;
             bus.emit('updateUI');
             bus.emit('log', {msg: `🗺️ DEBUG: Spawning ${combo} at Slot ${slot}`, cls: 't-sys'});

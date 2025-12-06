@@ -197,14 +197,28 @@
         </div>
 
         <div class="debug-section">
+            <label>🎲 Set Dice Combo</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:4px;">
+                <button id="btn-debug-pair" class="debug-action-btn small">Pair</button>
+                <button id="btn-debug-2pair" class="debug-action-btn small">2 Pairs</button>
+                <button id="btn-debug-3kind" class="debug-action-btn small">3 Kind</button>
+                <button id="btn-debug-fullhouse" class="debug-action-btn small">Full House</button>
+                <button id="btn-debug-ministr" class="debug-action-btn small">Mini Str</button>
+                <button id="btn-debug-bigstr" class="debug-action-btn small">Big Str</button>
+                <button id="btn-debug-4kind" class="debug-action-btn small">4 Kind</button>
+                <button id="btn-debug-yahtzee" class="debug-action-btn small">6x Same</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
             <label>🎴 手牌測試</label>
             <select id="debug-hand-select" class="debug-select"></select>
-            <button id="btn-debug-draw" class="debug-action-btn small">加入手牌</button>
+            <button id="btn-debug-draw" class="debug-action-btn small" style="margin-top:4px;">加入手牌</button>
         </div>
 
         <div class="debug-section">
             <label>🗺️ 場地卡測試</label>
-            <div style="display:flex; gap:5px;">
+            <div style="display:flex; gap:5px; margin-top:4px;">
                 <select id="debug-slot-select" class="debug-select" style="width:30%">
                     <option value="0">左</option>
                     <option value="1">中</option>
@@ -212,7 +226,7 @@
                 </select>
                 <select id="debug-board-select" class="debug-select" style="width:70%"></select>
             </div>
-            <button id="btn-debug-spawn" class="debug-action-btn small">生成卡片</button>
+            <button id="btn-debug-spawn" class="debug-action-btn small" style="margin-top:4px;">生成卡片</button>
         </div>
     </div>
     <button id="btn-show-debug" class="debug-toggle-btn">🐞</button>

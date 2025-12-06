@@ -539,13 +539,20 @@ class ResolveState extends GameState {
                     board: this.game.board, 
                     cardIndex: i, 
                     bonusDmg: 0, 
+                    // [MODIFIED] Pass current finalDmg to context
+                    finalDmg: finalDmg,
                     cardsToRemove: cardsToRemove, 
                     extraLog: "", 
                     winningDice: winningDice,
-                    gameModel: this.game
+                    gameModel: this.game,
+                    winner: winner // [MODIFIED] Pass winner to context for Lifesteal
                 };
                 EffectProcessor.process('on_resolve_success', obj, context);
+                
+                // [MODIFIED] Retrieve updated damage from context (to support multipliers like Gamble)
+                finalDmg = context.finalDmg; 
                 finalDmg += context.bonusDmg;
+                
                 if (context.extraLog) extraLog += " " + context.extraLog;
             };
             

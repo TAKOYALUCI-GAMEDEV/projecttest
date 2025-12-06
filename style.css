@@ -406,12 +406,21 @@ body {
 .condition-tag.buff { background: #d5f5e3; color: #27ae60; border: 1px solid #a9dfbf; }
 
 .condition-tag .tooltip-text {
-    visibility: hidden; width: 140px; 
+    visibility: hidden; 
+    /* [MODIFIED] Match card width (approx) */
+    width: 110px; 
+    min-width: 100%; /* Ensure it's at least as wide as the tag */
+    
     background-color: #333; color: #fff; 
     text-align: center; border-radius: 6px; padding: 5px; 
     position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); 
-    z-index: 200; opacity: 0; transition: opacity 0.3s; 
-    font-size: 0.7rem; white-space: normal;
+    z-index: 300; opacity: 0; transition: opacity 0.3s; 
+    
+    /* Text wrapping settings */
+    font-size: 0.7rem; 
+    white-space: normal; /* Allow text to wrap */
+    line-height: 1.2;
+    
     box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #fff;
     pointer-events: none;
 }
@@ -686,6 +695,8 @@ body {
     border: 1px solid #f1c40f; border-radius: 8px;
     padding: 10px; color: #fff; font-family: monospace;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    max-height: 80vh; /* Added scroll support */
+    overflow-y: auto; /* Added scroll support */
 }
 .debug-panel.hidden { display: none; }
 .debug-header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #555; padding-bottom: 5px; font-weight: bold; color: #f1c40f; }

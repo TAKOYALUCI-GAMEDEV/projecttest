@@ -19,11 +19,11 @@ const TEXTS = {
     zh: {
         boss_hand: "🤖 BOSS 手牌", player_hand: "👤 你的手牌", drag_here: "DRAG HERE",
         
-        /* [MODIFIED] Button Texts */
+        /* Button Texts */
         roll_btn: "擲骰子", 
         reroll_btn: "重擲", 
-        lock_btn: "鎖定手牌",   // 用於擲骰階段
-        end_turn_btn: "結束回合", // 用於選牌階段
+        lock_btn: "鎖定手牌",   
+        end_turn_btn: "結束回合", 
         
         /* Unused but kept for safety */
         confirm_btn: "確認選擇", 
@@ -87,8 +87,8 @@ const TEXTS = {
             evolve_tag: "🧬 平手進化", evolve_desc: "平手時變身為更強的卡片",
             invert_tag: "⤵️ 比小不比大", invert_desc: "點數總和較小的一方獲勝",
             ban_tag: "🚫 禁骰 {val}", ban_desc: "點數 {val} 無法使用",
-            roll_tag: "🎯 指定點數", roll_desc: "進場隨機鎖定點數",
-            rank_tag: "🔢 特殊順序", rank_desc: "改變比大小的點數順序",
+            roll_tag: "🎯 指定點數 [{val}]", roll_desc: "點數 [{val}] 為最大，其餘依序遞減 (例 5>4>3>2>1>6)",
+            rank_tag: "🔢 特殊順序", rank_desc: "點數大小順序: {val}",
             modify_tag: "⚡ 條件增傷", modify_desc: "滿足特定條件時傷害加倍",
         },
 
@@ -97,7 +97,7 @@ const TEXTS = {
     en: {
         boss_hand: "🤖 BOSS Hand", player_hand: "👤 Player Hand", drag_here: "DRAG HERE",
         
-        /* [MODIFIED] Button Texts */
+        /* Button Texts */
         roll_btn: "Roll Dice", 
         reroll_btn: "Reroll", 
         lock_btn: "Lock Hand", 
@@ -164,8 +164,8 @@ const TEXTS = {
             evolve_tag: "🧬 Evolve", evolve_desc: "Evolve on Tie",
             invert_tag: "⤵️ Low Wins", invert_desc: "Smallest sum wins",
             ban_tag: "🚫 Ban {val}", ban_desc: "Dice {val} cannot be used",
-            roll_tag: "🎯 Target", roll_desc: "Target specific dice",
-            rank_tag: "🔢 Chaos Rank", rank_desc: "Alters rank order",
+            roll_tag: "🎯 Target [{val}]", roll_desc: "Target {val} is strongest. Order: {val} > ...",
+            rank_tag: "🔢 Chaos Rank", rank_desc: "Order: {val}",
             modify_tag: "⚡ Boost", modify_desc: "Bonus damage on condition",
         },
 
@@ -177,10 +177,11 @@ function t(key) { return TEXTS[currentLang][key] || key; }
 function cName(key) { return TEXTS[currentLang].cards[key] || key; }
 
 // Helper for effect text replacement
+// [MODIFIED] Now uses split/join to replace ALL occurrences (global replacement)
 function tEff(key, replacements = {}) {
     let str = TEXTS[currentLang].effects[key] || key;
     for (const [k, v] of Object.entries(replacements)) {
-        str = str.replace(`{${k}}`, v);
+        str = str.split(`{${k}}`).join(v);
     }
     return str;
 }
@@ -221,6 +222,7 @@ const CARD_CONFIG = {
 
 const SPECIAL_CARDS_DATA = [
     { id: "ShieldGen", effects: [{ trigger: "passive", type: "guard_passive" }] },
+    // [MODIFIED] Reverted chance to 0.166
     { id: "Roulette", effects: [{ trigger: "on_resolve_success", type: "gamble_crit", chance: 0.166, multiplier: 2 }] },
     { id: "Mimic", effects: [{ trigger: "on_clash_tie", type: "evolve_on_tie" }] },
     { id: "Fusion", effects: [{ trigger: "on_resolve_success", type: "chain_buff", value: 1.5 }] },

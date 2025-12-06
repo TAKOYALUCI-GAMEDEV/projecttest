@@ -62,7 +62,12 @@ const EffectLibrary = {
     'lifesteal': (context, params) => {
         if (context.gameModel && context.finalDmg > 0) {
             const heal = Math.floor(context.finalDmg * params.value);
-            context.gameModel.pHP = Math.min(context.gameModel.pMaxHP, context.gameModel.pHP + heal);
+            // [MODIFIED] Check winner to determine who gets healed
+            if (context.winner === 'player') {
+                context.gameModel.pHP = Math.min(context.gameModel.pMaxHP, context.gameModel.pHP + heal);
+            } else if (context.winner === 'enemy') {
+                context.gameModel.eHP = Math.min(context.gameModel.eMaxHP, context.gameModel.eHP + heal);
+            }
             context.extraLog = `(Lifesteal +${heal})`;
         }
     },
@@ -126,13 +131,21 @@ const EffectLibrary = {
     },
     'dynamic_rank_from_state': (context, params) => {
         const targetVal = context.cardObj.state ? context.cardObj.state[params.key] : 6;
-        let score = 0;
+        let rankMap = {};
+        let curr = targetVal;
+        
+        for (let score = 60; score >= 10; score -= 10) {
+            rankMap[curr] = score;
+            curr--;
+            if (curr < 1) curr = 6; 
+        }
+
+        let totalScore = 0;
         context.dice.forEach(d => {
-            let rankScore = d;
-            if (d === targetVal) rankScore = 20; 
-            score += rankScore;
+            totalScore += (rankMap[d] || 0);
         });
-        context.customScore = score;
+        
+        context.customScore = totalScore;
     },
     'hidden_val': (context, params) => {
         context.card.isHidden = true;
@@ -174,18 +187,22 @@ const EffectLibrary = {
         context.card.baseDmg = context.card.dmg;
     },
     'guard_passive': (context, params) => { },
+    
+    // [MODIFIED] Chain Buff now directly modifies the neighbor card's dmg
     'chain_buff': (context, params) => {
         const targetIdx = context.cardIndex + 1;
         if (targetIdx < context.board.length) {
             const target = context.board[targetIdx];
-            if (target) { // UX Fix: Check existence
-                if (!target.tempMult) target.tempMult = 1;
-                target.tempMult *= params.value;
-                context.finalDmg = Math.floor(context.finalDmg * params.value);
-                context.extraLog = `(Fusion Link!)`;
+            if (target) { 
+                // Directly multiply current damage and base damage to persist effect
+                target.dmg = Math.floor(target.dmg * params.value);
+                target.baseDmg = Math.floor(target.baseDmg * params.value);
+                
+                context.extraLog = `(Chain! Right Card x${params.value})`;
             }
         }
     },
+    
     'explode_neighbors': (context, params) => {
         const idx = context.cardIndex;
         [idx-1, idx+1].forEach(nIdx => {
@@ -269,7 +286,7 @@ const EffectLibrary = {
     // Vital Essence
     'buff_vital_essence': async (context, params) => {
         if(context.gameModel) {
-            // [已修改] 改為數值累加
+            // [MODIFIED] 累加
             context.gameModel.vitalEssenceActive += 1;
             bus.emit('log', {msg: `✨ Vital Essence Active! (Stack x${context.gameModel.vitalEssenceActive})`, cls: 't-sys'});
             bus.emit('updateUI');
@@ -392,7 +409,13 @@ const EffectProcessor = {
             if (eff.type === 'growth_turn_end') tags.push({ type: eff.value>0?'buff':'ban', text: tEff('growth_tag', {sign: eff.value>0?'+':'', val: eff.value}), desc: tEff('growth_desc') });
             if (eff.type === 'chain_buff') tags.push({ type: 'buff', text: tEff('chain_tag', {val: eff.value}), desc: tEff('chain_desc', {val: eff.value}) });
             if (eff.type === 'bonus_score_parity') tags.push({ type: 'buff', text: tEff('parity_tag', {val: eff.value}), desc: tEff('parity_desc', {val: eff.value}) });
-            if (eff.type === 'gamble_crit') tags.push({ type: 'buff', text: tEff('crit_tag', {chance: eff.chance, val: eff.multiplier}), desc: tEff('crit_desc', {chance: eff.chance, val: eff.multiplier}) });
+            
+            // [MODIFIED] Always display as percentage (e.g. 17%, 50%)
+            if (eff.type === 'gamble_crit') {
+                let chanceDisp = Math.round(eff.chance * 100) + "%";
+                tags.push({ type: 'buff', text: tEff('crit_tag', {chance: chanceDisp, val: eff.multiplier}), desc: tEff('crit_desc', {chance: chanceDisp, val: eff.multiplier}) });
+            }
+            
             if (eff.type === 'overpower_on_tie') tags.push({ type: 'buff', text: tEff('overpower_tag'), desc: tEff('overpower_desc') });
             if (eff.type === 'hidden_val') tags.push({ type: 'buff', text: tEff('hidden_tag'), desc: tEff('hidden_desc') });
             if (eff.type === 'explode_neighbors') tags.push({ type: 'ban', text: tEff('explode_tag'), desc: tEff('explode_desc') });
@@ -401,8 +424,19 @@ const EffectProcessor = {
             if (eff.type === 'evolve_on_tie') tags.push({ type: 'buff', text: tEff('evolve_tag'), desc: tEff('evolve_desc') });
             if (eff.type === 'invert_win') tags.push({ type: 'ban', text: tEff('invert_tag'), desc: tEff('invert_desc') });
             if (eff.type === 'ban_dice') tags.push({ type: 'ban', text: tEff('ban_tag', {val: `[${eff.values.join(',')}]`}), desc: tEff('ban_desc', {val: eff.values.join(',')}) });
-            if (eff.type === 'roll_on_enter') tags.push({ type: 'buff', text: tEff('roll_tag'), desc: tEff('roll_desc') });
-            if (eff.type === 'custom_rank') tags.push({ type: 'ban', text: tEff('rank_tag'), desc: tEff('rank_desc') });
+            
+            // [MODIFIED] Added logic to read state for roll_on_enter
+            if (eff.type === 'roll_on_enter') {
+                const val = (sourceObject.state && sourceObject.state[eff.key]) ? sourceObject.state[eff.key] : '?';
+                tags.push({ type: 'buff', text: tEff('roll_tag', {val: val}), desc: tEff('roll_desc', {val: val}) });
+            }
+            
+            // [MODIFIED] Logic for custom_rank: format the order array
+            if (eff.type === 'custom_rank') {
+                const val = eff.order ? eff.order.join(' > ') : '?';
+                tags.push({ type: 'ban', text: tEff('rank_tag'), desc: tEff('rank_desc', {val: val}) });
+            }
+            
             if (eff.type === 'modify_damage') tags.push({ type: 'buff', text: tEff('modify_tag'), desc: tEff('modify_desc') });
         });
         return tags;
